@@ -5,75 +5,16 @@
 #
 # Distributed under terms of the BSD 3-Clause license.
 
-"""Original score_es
+"""C v2
 """
-import numpy
 import math
 from numba import njit
+from .c_v2_gcc import score_es_c_v2 as score_es_c_v2_gcc
+from .c_v2_clang import score_es_c_v2 as score_es_c_v2_clang
 
 
-@njit(fastmath=True, nogil=True, boundscheck=False)
-def score_es_numba_v1(preds, obsrvs):
-    """Naive Numba impl. Credit: Niteya
-
-    Notes
-    -----
-    We tried to mimic the original Python code as much as possible. However, the original NumPy's
-    norm function accepts an argument `axis`, while Numba's own norm implementation does not.
-    We therefore had to modified the code somehow.
-    """
-    obs_size, obs_event = obsrvs.shape
-    pred_size, pred_event = preds.shape
-    assert obs_event == pred_event, "The second dimensions do not match"
-
-    score_1 = 0.0
-    score_2 = 0.0
-    for i in range(pred_size):
-        for j in range(obs_size):
-            score_1 += numpy.linalg.norm(preds[i] - obsrvs[j])
-
-        for j in range(i+1, pred_size):
-            score_2 += numpy.linalg.norm(preds[i] - preds[j])
-
-    score_1 /= (obs_size * pred_size)
-    score_2 /= (pred_size * (pred_size - 1))
-
-    return score_1 - score_2
-
-
-@njit(fastmath=True, nogil=True, boundscheck=False)
-def score_es_numba_v2(preds, obsrvs):
-    """Specialized version of JIT score_es for shape[1] = 2.
-    """
-    obs_size, obs_event = obsrvs.shape
-    pred_size, pred_event = preds.shape
-    assert obs_event == pred_event, "The second dimensions do not match"
-
-    score_1 = 0.0
-    score_2 = 0.0
-    for i in range(pred_size):
-        for j in range(obs_size):
-            norm = 0.0
-            for k in range(obs_event):
-                tmp = preds[i, k] - obsrvs[j, k]
-                norm += tmp * tmp
-            score_1 += math.sqrt(norm)
-
-        for j in range(i+1, pred_size):
-            norm = 0.0
-            for k in range(obs_event):
-                tmp = preds[i, k] - preds[j, k]
-                norm += tmp * tmp
-            score_2 += math.sqrt(norm)
-
-    score_1 /= (obs_size * pred_size)
-    score_2 /= (pred_size * (pred_size - 1))
-
-    return score_1 - score_2
-
-
-@njit(fastmath=True, nogil=True, boundscheck=False)
-def _score_es_numba_v3_1(preds, obsrvs):
+@njit(nogil=True, boundscheck=False)
+def _score_es_c_v2_numba_1(preds, obsrvs):
     """Specialized version of JIT score_es for shape[1] = 1.
     """
     obs_size, obs_event = obsrvs.shape
@@ -96,8 +37,8 @@ def _score_es_numba_v3_1(preds, obsrvs):
     return score_1 - score_2
 
 
-@njit(fastmath=True, nogil=True, boundscheck=False)
-def _score_es_numba_v3_2(preds, obsrvs):
+@njit(nogil=True, boundscheck=False)
+def _score_es_c_v2_numba_2(preds, obsrvs):
     """Specialized version of JIT score_es for shape[1] = 2.
     """
     obs_size, obs_event = obsrvs.shape
@@ -130,8 +71,8 @@ def _score_es_numba_v3_2(preds, obsrvs):
     return score_1 - score_2
 
 
-@njit(fastmath=True, nogil=True, boundscheck=False)
-def _score_es_numba_v3_6(preds, obsrvs):
+@njit(nogil=True, boundscheck=False)
+def _score_es_c_v2_numba_6(preds, obsrvs):
     """Specialized version of JIT score_es for shape[1] = 6.
     """
     obs_size, obs_event = obsrvs.shape
@@ -164,8 +105,8 @@ def _score_es_numba_v3_6(preds, obsrvs):
     return score_1 - score_2
 
 
-@njit(fastmath=True, nogil=True, boundscheck=False)
-def _score_es_numba_v3_12(preds, obsrvs):
+@njit(nogil=True, boundscheck=False)
+def _score_es_c_v2_numba_12(preds, obsrvs):
     """Specialized version of JIT score_es for shape[1] = 12.
     """
     obs_size, obs_event = obsrvs.shape
@@ -198,53 +139,20 @@ def _score_es_numba_v3_12(preds, obsrvs):
     return score_1 - score_2
 
 
-@njit(fastmath=True, nogil=True, boundscheck=False)
-def score_es_numba_v3(preds, obsrvs):
+@njit(nogil=True, boundscheck=False)
+def score_es_c_v2_numba(preds, obsrvs):
     """Wrapper for Numba v3.
     """
     event_size = obsrvs.shape[1]
 
     match event_size:
         case 1:
-            return _score_es_numba_v3_1(preds, obsrvs)
+            return _score_es_c_v2_numba_1(preds, obsrvs)
         case 2:
-            return _score_es_numba_v3_2(preds, obsrvs)
+            return _score_es_c_v2_numba_2(preds, obsrvs)
         case 6:
-            return _score_es_numba_v3_6(preds, obsrvs)
+            return _score_es_c_v2_numba_6(preds, obsrvs)
         case 12:
-            return _score_es_numba_v3_12(preds, obsrvs)
+            return _score_es_c_v2_numba_12(preds, obsrvs)
         case _:
             raise ValueError(f"Event size {event_size} is not supported.")
-
-
-if __name__ == "__main__":
-    import sys
-    import pathlib
-    import importlib
-
-    def _import_helper(module_name, filepath):
-        """Import a module using its file path.
-
-        Arguments
-        ---------
-        module_name : str
-            The module name that will be registered in sys.modules.
-        filepath : str or os.PathLike
-            The path to the source file.
-
-        Returns
-        -------
-        module : a Python module
-        """
-        spec = importlib.util.spec_from_file_location(module_name, filepath)
-        module = importlib.util.module_from_spec(spec)
-        sys.modules[module_name] = module
-        spec.loader.exec_module(module)
-        return module
-
-    root = pathlib.Path(__file__).resolve().parent
-    profiler = getattr(_import_helper("profiler", root.parent.joinpath("profiler.py")), "profiler")
-
-    result = profiler(score_es_numba_v1, "score_es_numba_v1", n_rep=1)
-    result = profiler(score_es_numba_v2, "score_es_numba_v2", n_rep=1)
-    result = profiler(score_es_numba_v3, "score_es_numba_v3", n_rep=1)
