@@ -1,3 +1,6 @@
 results
 *.so
 *.csv
+*.png
+*.pdf
+*.svg

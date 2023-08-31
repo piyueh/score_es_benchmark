@@ -35,10 +35,14 @@ if __name__ == "__main__":
     MPI.COMM_WORLD.Barrier()
 
     # target shapes
-    shapes = [(1000, 1), (10000, 1), (10000, 2), (10000, 6), (10000, 12)]
+    shapes = [
+        (1000, 1), (1000, 2), (1000, 6), (1000, 12),
+        (5000, 1), (5000, 2), (5000, 6), (5000, 12),
+        (10000, 1), (10000, 2), (10000, 6), (10000, 12)
+    ]
 
     # calculate job iteration ranges
-    reps = 100
+    reps = 1000
     quotient, remainder = divmod(reps, nprocs)
     bg = rank * quotient +  (rank if rank <= remainder else remainder)
     ed = bg + quotient + int(rank < remainder)
@@ -47,7 +51,7 @@ if __name__ == "__main__":
 
     # init log file
     with open(logfile, "w") as fp:
-        fp.write("Backend, Version, Shape, Iteration, Time\n")
+        fp.write("IMPL,Backend,NEvents,EventSize,Iteration,Time\n")
 
     # run
     for (key, func), shape in itertools.product(options.items(), shapes):
@@ -69,6 +73,6 @@ if __name__ == "__main__":
 
             # save time of each repeat
             with open(logfile, "a") as fp:
-                fp.write(f"{key[0]}, {key[1]}, {shape}, {it}, {t}\n")
+                fp.write(f"{key[0]},{key[1]},{shape[0]},{shape[1]},{it},{t}\n")
 
             print(f"[{name}] done job {key} and {shape} at iter={it}: {t} ms")

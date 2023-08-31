@@ -8,7 +8,7 @@
 #SBATCH --cores-per-socket=16
 #SBATCH --mem-per-cpu=30G
 #SBATCH --partition=largemem_q
-#SBATCH --time=0-1:00:00
+#SBATCH --time=0-4:00:00
 #SBATCH --output=slurm-%A.out
 
 # get the path to this script (method depending on whether using Slurm)
