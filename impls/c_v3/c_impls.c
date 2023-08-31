@@ -239,15 +239,15 @@ static PyMethodDef methods[] = {
     {NULL, NULL, 0, NULL}
 };
 
+#if defined(CLANG)
 static struct PyModuleDef c_impl_backend = {
     PyModuleDef_HEAD_INIT,
-    "score_es_c_v3",
+    "c_v3_clang",
     "C implementation of c v3",
     -1,
     methods
 };
 
-#if defined(CLANG)
 PyMODINIT_FUNC PyInit_c_v3_clang() {
     _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_OFF);
     _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_OFF);
@@ -257,6 +257,14 @@ PyMODINIT_FUNC PyInit_c_v3_clang() {
     return module;
 }
 #else
+static struct PyModuleDef c_impl_backend = {
+    PyModuleDef_HEAD_INIT,
+    "c_v3_gcc",
+    "C implementation of c v3",
+    -1,
+    methods
+};
+
 PyMODINIT_FUNC PyInit_c_v3_gcc() {
     _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_OFF);
     _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_OFF);

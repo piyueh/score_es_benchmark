@@ -7,7 +7,7 @@
 #
 
 
-# c v1
+# c v1 (unrolling array ops; -O3)
 # =============================================================================
 gcc \
     -I${CONDA_PREFIX}/include/python3.10 \
@@ -31,7 +31,7 @@ clang \
     ./impls/c_v1/c_impls.c
 
 
-# c v2
+# c v2 (compile-time constants for nums of cols; -O3)
 # =============================================================================
 gcc \
     -I${CONDA_PREFIX}/include/python3.10 \
@@ -55,7 +55,7 @@ clang \
     ./impls/c_v2/c_impls.c
 
 
-# c v3
+# c v3 (contiguous memory; -O3)
 # =============================================================================
 gcc \
     -I${CONDA_PREFIX}/include/python3.10 \
@@ -63,7 +63,7 @@ gcc \
     -fPIC \
     -shared \
     -march=native \
-    -Ofast -funroll-loops -ffast-math \
+    -O3 \
     -o ./impls/c_v3/c_v3_gcc.so \
     ./impls/c_v3/c_impls.c
 
@@ -79,7 +79,7 @@ clang \
     ./impls/c_v3/c_impls.c
 
 
-# c v4
+# c v4 (fast math compiler flags)
 # =============================================================================
 gcc \
     -I${CONDA_PREFIX}/include/python3.10 \
