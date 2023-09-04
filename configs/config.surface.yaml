@@ -1,0 +1,8 @@
+---
+data:
+  - ../data/surface_sigma_1.npz
+  - ../data/surface_sigma_2.npz
+
+misc:
+  true_params: [0.72916667, 0.25, 0.6, 0.36458333, 0.25, 0.8]
+  n_true_events: [1000000, 1000000]

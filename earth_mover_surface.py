@@ -38,11 +38,13 @@ def worker(
 
     # initialize theory, sampler, and the loss
     qcf = utilities.QCF()
-    sigma1 = utilities.CrossSectionIMPL1(qcf)
-    sigma2 = utilities.CrossSectionIMPL2(qcf)
-    sampler1 = utilities.Sampler(sigma1, seed=seed*10)
-    sampler2 = utilities.Sampler(sigma2, seed=seed**2)
-    loss = utilities.StatsLoss(2, [1., 0., 1., 0.])
+
+    sigmas = [utilities.CrossSectionIMPL1(qcf), utilities.CrossSectionIMPL2(qcf)]
+    samplers = [
+        utilities.Sampler(sigma, seed=seed*10)
+        for sigma in sigmas
+    ]
+    losses = [utilities.StatsLoss([1., 0.]) for _ in range(2)]
 
     while True:
         try:
@@ -57,32 +59,22 @@ def worker(
         params[3:] = truth[3:] + rng.normal(0., y_dist, 3)
 
         # bootstrap true data
-        obsrvs = [
-            {
-                "events": dataloader.bootstrap(nevents[0], channels=[0])[0],
-                "norm": dataloader.norms[0]
-            },
-            {
-                "events": dataloader.bootstrap(nevents[1], channels=[1])[0],
-                "norm": dataloader.norms[1]
-            },
-
-        ]
+        obsrvs = dataloader.bootstrap(nevents)
 
         # get prediction
         preds = [
             {
-                "events": sampler1(nevents[0], params),
-                "norm": sampler1.cross.get_norm(params)
-            },
-            {
-                "events": sampler2(nevents[1], params),
-                "norm": sampler2.cross.get_norm(params)
-            },
+                "events": sampler(n, params),
+                "norm": sampler.cross.get_norm(params)
+            }
+            for sampler, n in zip(samplers, nevents)
         ]
 
         # loss
-        val = loss.forward(preds, obsrvs)
+        val = sum([
+            loss.forward(pred, obsrv)
+            for loss, pred, obsrv in zip(losses, preds, obsrvs)
+        ])
 
         outq.put((trial, yj, xi, val), True)
         inpq.task_done()
@@ -143,13 +135,14 @@ if __name__ == "__main__":
 
     # folders
     rootdir = pathlib.Path(__file__).expanduser().resolve().parent
+    cfgdir = rootdir.joinpath("configs")
     resultdir = rootdir.joinpath("results")
     resultdir.mkdir(exist_ok=True)
 
     # read true parameters from config file
-    with open(rootdir.joinpath("config.yaml"), "r") as fp:
+    with open(cfgdir.joinpath("config.surface.yaml"), "r") as fp:
         cfg = yaml.load(fp, yaml.Loader)
-        cfg["data"] = [rootdir.joinpath(pathlib.Path(p)) for p in cfg["data"]]
+        cfg["data"] = [cfgdir.joinpath(pathlib.Path(p)) for p in cfg["data"]]
 
     # configurations specific to this loss-surface plot
     max_disturb = 0.5

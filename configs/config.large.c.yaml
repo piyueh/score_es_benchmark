@@ -1,0 +1,38 @@
+---
+env:
+  nevents: [50000, 25000]
+  nobsrvs: 5000
+  seed: 103
+  qcf:
+    xmin: 1.0e-5
+    xmax: 0.99999
+  samplers:
+    - npts: 100
+      seed: null
+    - npts: 100
+      seed: null
+  losses:
+    - weights: [1.0, 1.0]
+      impl: ["C v4", "Clang"]
+    - weights: [1.0, 1.0]
+      impl: ["C v4", "Clang"]
+
+optimizer:
+  parmin: [1.e-5, -1.0, 1.e-5, 1.e-5, -1.0, 1.e-5]
+  parmax: [3.0, 1.0, 5.0, 3.0, 1.0, 5.0]
+  options:
+    ftol: 1.0e-6
+    gtol: 1.0e-6
+    eps: 1.0e-3
+    maxls: 1000
+    disp: false
+    iprint: 1
+  seed: 222
+
+data:
+  - ../data/training_sigma_1.npz
+  - ../data/training_sigma_2.npz
+
+misc:
+  true_params: [2.1875, -0.5, 3, 1.09375, -0.5, 4]
+  n_true_events: [1000000, 1000000]

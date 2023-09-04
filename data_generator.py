@@ -3,6 +3,7 @@
 
 """Generate data to mimic true experimental event data.
 """
+import argparse
 import pathlib
 import numpy
 import yaml
@@ -10,20 +11,34 @@ import utilities
 
 if __name__ == "__main__":
 
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "app", action="store", type=str, metavar="APPLICATION",
+        choices=["surface", "training"], help="\"surface\" or \"training\"."
+    )
+    args = parser.parse_args()
+
     # folder/file paths
     rootdir = pathlib.Path(__file__).expanduser().resolve().parent
-    cfgfile = rootdir.joinpath("config.yaml")
+
+    if args.app == "surface":
+        cfgfile = rootdir.joinpath("configs", "config.surface.yaml")
+    else:
+        cfgfile = rootdir.joinpath("configs", "config.small.yaml")
 
     # read config
-    with open(rootdir.joinpath("config.yaml"), "r") as fp:
+    with open(cfgfile, "r") as fp:
         config = yaml.load(fp, yaml.Loader)
 
     # aliases
     nevents = config["misc"]["n_true_events"]
     params = config["misc"]["true_params"]
 
+    # stdout msg
+    print(f"Generating data for 1D proxy QCFs w/ parameters: {params}")
+
     # the theoritical model
-    qcf = utilities.QCF(0.1, 0.99999)
+    qcf = utilities.QCF()
     cross_1 = utilities.CrossSectionIMPL1(qcf)
     cross_2 = utilities.CrossSectionIMPL2(qcf)
     sampler_1 = utilities.Sampler(cross_1, npts=1000, seed=111)

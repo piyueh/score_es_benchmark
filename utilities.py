@@ -12,6 +12,7 @@ import numbers
 import numpy
 import scipy.integrate
 import scipy.interpolate
+import scipy.optimize
 import impls
 
 
@@ -74,7 +75,10 @@ class DataLoader:
 
         events = []
         for n, ch in zip(nevents, channels):
-            events.append(self.rng.choice(self.events[ch], n, True))
+            events.append({
+                "events": self.rng.choice(self.events[ch], n, True),
+                "norm": self.norms[ch],
+            })
 
         return events
 
@@ -251,21 +255,20 @@ class StatsLoss:
     """Loss function for stats workflow 1 using NumPy.
     """
 
-    def __init__(self, n_channels, weights=1., impl=("C v4", "Clang")):
+    def __init__(self, weights=1., impl=("C v4", "Clang")):
 
         # make aliases to frequently used settings for conveniences
-        self.impl = impl
-        self.n_channels = n_channels
+        self.impl = tuple(impl)
 
         if isinstance(weights, numbers.Number):
-            self.weights = numpy.full(n_channels*2, weights, dtype=float)
+            self.weights = numpy.full(2, weights, dtype=float)
         else:
             self.weights = numpy.asarray(weights, dtype=float)
 
         # temporary data holders for logging purpose outside this class
         self.cost = 0.
-        self.costs = numpy.zeros((2*n_channels,), dtype=float)
-        self.weighted_costs = numpy.zeros((2*n_channels,), dtype=float)
+        self.costs = numpy.zeros((2,), dtype=float)
+        self.weighted_costs = numpy.zeros((2,), dtype=float)
 
         # actual implementation of the earth-mover loss
         self.score_es = impls.options[self.impl]
@@ -291,11 +294,98 @@ class StatsLoss:
             Weighted and aggregated loss.
         """
 
-        for ch, (pred, obsrv) in enumerate(zip(preds, obsrvs)):
-            self.costs[ch*2] = self.score_es(pred["events"], obsrv["events"])
-            self.costs[ch*2+1] = (obsrv["norm"] - pred["norm"])**2
+        self.costs[0] = self.score_es(preds["events"], obsrvs["events"])
+        self.costs[1] = (obsrvs["norm"] - preds["norm"])**2
 
         self.weighted_costs[...] = self.weights * self.costs
         self.cost = numpy.sum(self.weighted_costs)
 
         return self.cost
+
+
+class StatsWorkflowEnv:
+    """Mock environment.
+    """
+    def __init__(self, config, obsrvs):
+
+        self.obsrvs = obsrvs
+        self.nevents = config["nevents"]
+        self.seed = config["seed"]
+
+        # underlying QCFs
+        self.qcf = QCF(**config["qcf"])
+
+        # corss-sections
+        self.crosses = [
+            CrossSectionIMPL1(self.qcf), CrossSectionIMPL2(self.qcf)
+        ]
+
+        # samplers for different cross-sections
+        self.samplers = [
+            Sampler(_1, **_2)
+            for _1, _2 in zip(self.crosses, config["samplers"])
+        ]
+
+        # loss functions for different cross-sections
+        self.lossfns = [StatsLoss(**_1) for _1 in config["losses"]]
+
+        # sanity check
+        assert len(self.crosses) == len(self.samplers)
+        assert len(self.samplers) == len(self.lossfns)
+        assert len(self.lossfns) == len(self.nevents)
+        assert len(self.nevents) == len(self.obsrvs)
+
+    def step(self, params):
+        """Stepping function.
+        """
+
+        iters = enumerate(zip(
+            self.crosses, self.samplers, self.lossfns, self.nevents,
+            self.obsrvs
+        ))
+
+        total = 0.
+        for i, (cross, sampler, lossfn, nevents, obsrvs) in iters:
+
+            # each env always uses the same sample points from inverse CDF
+            sampler._rng = numpy.random.default_rng(self.seed**i)
+
+            preds = {
+                "events": sampler.get_samples(nevents, params),
+                "norm": cross.get_norm(params),
+            }
+
+            loss = lossfn.forward(preds, obsrvs)
+            total += loss
+
+        return total
+
+
+class Optimizer:
+    """A mock optimizer.
+    """
+    def __init__(self, env, config):
+        self.env = env
+        self.options = config["options"]
+        self.parmin = config["parmin"]
+        self.parmax = config["parmax"]
+        self.seed = config["seed"]
+        self.rng = numpy.random.default_rng(self.seed)
+        self.bounds = [(_1, _2) for _1, _2 in zip(self.parmin, self.parmax)]
+
+    def run(self):
+        """Run.
+
+        Returns
+        -------
+        An instance of `scipy.optimize.OptimizeResult`
+        """
+        x0 = self.rng.uniform(self.parmin, self.parmax)
+
+        res: scipy.optimize.OptimizeResult = scipy.optimize.minimize(
+            self.env.step, x0,
+            method="L-BFGS-B", jac="2-point",
+            options=self.options, bounds=self.bounds
+        )
+
+        return res
