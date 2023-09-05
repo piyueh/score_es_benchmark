@@ -42,4 +42,4 @@ echo "==============================================================="
 echo "Start the run"
 
 cd ${ROOT}
-mpiexec -n ${SLURM_NTASKS} python ${ROOT}/main.py
+mpiexec -n ${SLURM_NTASKS} python ${ROOT}/earth_mover_perf.py

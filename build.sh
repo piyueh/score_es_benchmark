@@ -1,10 +1,4 @@
 #! /bin/sh
-#
-# build.sh
-# Copyright (C) 2023 Pi-Yueh Chuang <pychuang@pm.me>
-#
-# Distributed under terms of the BSD 3-Clause license.
-#
 
 
 # c v1 (unrolling array ops; -O3)
