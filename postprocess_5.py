@@ -7,7 +7,6 @@
 
 """Post processing for ensemble analysis results.
 """
-#%%
 import itertools
 import pathlib
 import pickle
@@ -16,7 +15,6 @@ import numpy
 from matplotlib import pyplot
 
 # folders
-#%%
 rootdir = pathlib.Path(__file__).expanduser().resolve().parent
 resdir = rootdir.joinpath("results")
 imgdir = rootdir.joinpath("images")
@@ -56,7 +54,7 @@ for filename in filenames:
     # open and load the data
     with open(filename, "rb") as fp:
         data = pickle.load(fp)
-    
+
     # only record the data if it's bettern than the current
     if data.fun < losses[iboot]:
         losses[iboot] = data.fun

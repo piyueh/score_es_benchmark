@@ -7,7 +7,6 @@
 
 """Post-processing for the speedups of the loss function alone.
 """
-#%%
 import pathlib
 import re
 import pandas
@@ -127,7 +126,6 @@ def annotate_heatmap(
     return texts
 
 
-#%%
 if __name__ == "__main__":
 
     rootdir = pathlib.Path(__file__).expanduser().resolve().parent
@@ -194,7 +192,6 @@ if __name__ == "__main__":
     rowlabels = list([f"{col[0]}, {col[1]}" for col in speedups.index])
     data = speedups.values
 
-    #%%
     # normalizer mapping speedsup of segmental [0, 1] region
     norm = matplotlib.colors.PowerNorm(0.5, vmin=1.0, vmax=150, clip=True)
 

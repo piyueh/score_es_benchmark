@@ -7,7 +7,6 @@
 
 """Post processing for stats workflow performance benchmarks.
 """
-#%%
 import pathlib
 import pstats
 import itertools
@@ -40,7 +39,6 @@ losskey = dict(
 
 data = {}
 
-#%%
 for pbsize, impl in itertools.product(pbsizes, impls):
 
     print(f"Processing {pbsize} {impl} ...")
@@ -73,7 +71,6 @@ for pbsize, impl in itertools.product(pbsizes, impls):
         other=temp["step"]-temp["get_samples"]-temp["loss"]
     )
 
-#%%
 # create the figure
 fig = pyplot.figure(figsize=(6, 3.79), dpi=166, layout="constrained")
 fig.get_layout_engine().set(w_pad=0, h_pad=0, hspace=0, wspace=0)
@@ -200,32 +197,11 @@ axs[2].set_facecolor("whitesmoke")
 # ==============================================================================
 axs[3].axis("off")
 axs[3].spines[:].set_visible(False)
-# axs[3].text(
-#     0.5, 0.94, "Problem Size\n(# of Events)",
-#     transform=axs[3].transAxes, fontsize=14, va="bottom", ha="center",
-#     ma="center", weight="bold"
-# )
-# axs[3].text(
-#     0.5, 0.89, u"\u2022 Large: 50000\n\u2022 Medium: 10000\n\u2022 Small: 1000",
-#     transform=axs[3].transAxes, fontsize=14, va="top", ha="center", ma="left",
-#     linespacing=2.0, bbox=dict(boxstyle="square", fc='whitesmoke', ec="k")
-# )
-# axs[3].text(
-#     0.5, 0.99, "Code Components",
-#     transform=axs[3].transAxes, fontsize=13, va="top", ha="center",
-#     ma="center"
-# )
 axs[3].set_title("Code Components", fontsize=13)
 axs[3].legend(
     handles=arts, loc="upper center", bbox_to_anchor=(0.5, 1.1), ncols=2,
     fontsize=12, facecolor="whitesmoke", edgecolor="k", fancybox=False,
     markerscale=0.6, columnspacing=0.5, handletextpad=0.2, labelspacing=0.2
 )
-
-
-
-
-# legends
-# ==============================================================================
 
 fig.savefig(imgdir.joinpath("overall_speedups.png"), bbox_inches="tight")

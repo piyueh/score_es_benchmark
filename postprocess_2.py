@@ -7,7 +7,6 @@
 
 """Post-processing for plotting loss surface
 """
-#%%
 import pathlib
 import numpy
 import matplotlib.pyplot as pyplot
