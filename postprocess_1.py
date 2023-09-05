@@ -5,8 +5,9 @@
 #
 # Distributed under terms of the BSD 3-Clause license.
 
-"""Post-processing
+"""Post-processing for the speedups of the loss function alone.
 """
+#%%
 import pathlib
 import re
 import pandas
@@ -126,6 +127,7 @@ def annotate_heatmap(
     return texts
 
 
+#%%
 if __name__ == "__main__":
 
     rootdir = pathlib.Path(__file__).expanduser().resolve().parent
@@ -192,16 +194,21 @@ if __name__ == "__main__":
     rowlabels = list([f"{col[0]}, {col[1]}" for col in speedups.index])
     data = speedups.values
 
+    #%%
     # normalizer mapping speedsup of segmental [0, 1] region
     norm = matplotlib.colors.PowerNorm(0.5, vmin=1.0, vmax=150, clip=True)
 
     # create a figure and an axes in it
-    fig, ax = pyplot.subplots(1, 1, dpi=166, figsize=(12, 5), tight_layout=True)
+    fig, ax = pyplot.subplots(1, 1, dpi=166, figsize=(12, 5.05), tight_layout=True)
 
     # add the image to the axes
     im = heatmap(data, rowlabels, collabels, ax, cmap="coolwarm", norm=norm)
 
     # add annotations to the cell centers
-    texts = annotate_heatmap(im, data, "{x:.1f}x")
+    texts = annotate_heatmap(im, data, "{x:.1f}x", weight="bold")
+
+    ax.set_title("Speedups of the Loss Function Alone", fontsize=18, weight="bold")
+    ax.tick_params(labelsize=13, axis="y")
+    ax.tick_params(labelsize=13, labelrotation=30, axis="x")
 
     fig.savefig(imgdir.joinpath("earth_mover_speedups.png"), dpi=166)

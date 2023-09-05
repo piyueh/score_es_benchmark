@@ -7,6 +7,7 @@
 
 """Post-processing for plotting loss surface
 """
+#%%
 import pathlib
 import numpy
 import matplotlib.pyplot as pyplot
@@ -28,24 +29,23 @@ X, Y = numpy.meshgrid(
 )
 
 fig, axs = pyplot.subplots(
-    1, 2, sharex=True, figsize=(11, 5), dpi=166, layout="constrained")
+    1, 2, sharex=True, figsize=(7, 3.2), dpi=166, layout="constrained")
 
 im = axs[0].contour(X, Y, data, 8, cmap="turbo")
-ctxt = axs[0].clabel(im, inline=True, fontsize=12)
+ctxt = axs[0].clabel(im, inline=True, fontsize=14)
 
 for txt in ctxt:
     txt.set_c("k")
     txt.set_bbox(dict(facecolor="whitesmoke", edgecolor="none", pad=2))
 
-axs[0].set_xlabel(r"Perturb. lvl. in $N_u$, $a_u$, & $b_u$", fontsize=14)
 axs[0].set_ylabel(r"Perturb. lvl. in $N_d$, $a_d$, & $b_d$", fontsize=14)
 
 im = axs[1].contourf(X, Y, data, 16, cmap="turbo")
-axs[1].set_xlabel(r"Perturbation in $N_u$, $a_u$, & $b_u$", fontsize=14)
 axs[1].tick_params(left=False, right=False, labelleft=False)
+
+fig.supxlabel(r"Perturb. lvl. in $N_u$, $a_u$, & $b_u$", fontsize=14)
 
 cbar = fig.colorbar(im, ax=axs)
 cbar.set_label(label="Earth-Mover Loss Value", size=14)
 
 pyplot.savefig(imgfile)
-pyplot.show()
