@@ -108,7 +108,7 @@ axs[-1].legend(
 fig.supylabel("Occurrences", fontsize=12)
 fig.supxlabel("QCF Parameter Values", fontsize=12)
 fig.suptitle(
-    "QCF Parameter Distrubutions from Ensemble Analysis",
+    "QCF Parameter Distributions from Ensemble Analysis",
     fontsize=14, weight="bold"
 )
 fig.savefig(imgdir.joinpath("ensemble_analysis.png"), bbox_inches="tight")
