@@ -10,7 +10,10 @@ from .c_v3_clang import score_es_c_v3 as score_es_c_v3_clang
 
 
 @numba.njit(
-    numba.float64(numba.float64[:, ::1], numba.float64[:, ::1]),
+    [
+        numba.float64(numba.float64[:, ::1], numba.float64[:, ::1]),
+        numba.float32(numba.float32[:, ::1], numba.float32[:, ::1]),
+    ],
     nogil=True, boundscheck=False
 )
 def _score_es_c_v3_numba_1(preds, obsrvs):
@@ -37,7 +40,10 @@ def _score_es_c_v3_numba_1(preds, obsrvs):
 
 
 @numba.njit(
-    numba.float64(numba.float64[:, ::1], numba.float64[:, ::1]),
+    [
+        numba.float64(numba.float64[:, ::1], numba.float64[:, ::1]),
+        numba.float32(numba.float32[:, ::1], numba.float32[:, ::1]),
+    ],
     nogil=True, boundscheck=False
 )
 def _score_es_c_v3_numba_2(preds, obsrvs):
@@ -74,7 +80,10 @@ def _score_es_c_v3_numba_2(preds, obsrvs):
 
 
 @numba.njit(
-    numba.float64(numba.float64[:, ::1], numba.float64[:, ::1]),
+    [
+        numba.float64(numba.float64[:, ::1], numba.float64[:, ::1]),
+        numba.float32(numba.float32[:, ::1], numba.float32[:, ::1]),
+    ],
     nogil=True, boundscheck=False
 )
 def _score_es_c_v3_numba_6(preds, obsrvs):
@@ -111,7 +120,10 @@ def _score_es_c_v3_numba_6(preds, obsrvs):
 
 
 @numba.njit(
-    numba.float64(numba.float64[:, ::1], numba.float64[:, ::1]),
+    [
+        numba.float64(numba.float64[:, ::1], numba.float64[:, ::1]),
+        numba.float32(numba.float32[:, ::1], numba.float32[:, ::1]),
+    ],
     nogil=True, boundscheck=False
 )
 def _score_es_c_v3_numba_12(preds, obsrvs):

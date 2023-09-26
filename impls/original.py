@@ -5,6 +5,10 @@
 """
 import numpy
 import scipy
+import pylibraft.distance
+import cupy
+import cupyx.scipy.spatial
+import torch
 from numba import njit
 
 
@@ -87,3 +91,80 @@ def score_es_original_numba(preds, obsrvs):
     score_2 /= (pred_size * (pred_size - 1))
 
     return score_1 - score_2
+
+
+def score_es_original_cupy(preds, obsrvs):
+    """Using CuPy.
+    """
+
+    assert preds.dtype == cupy.float32, "CuPy's cdist only supports float32"
+    assert obsrvs.dtype == cupy.float32, "CuPy's cdist only supports float32"
+
+    pred_size, pred_event = preds.shape
+    assert obsrvs.shape[1] == pred_event, "Observations and events have different sizes"
+
+    # Calculate score1
+    score1 = cupy.mean(cupyx.scipy.spatial.distance.cdist(preds, obsrvs))
+
+    # Calculate score2
+    score2 = cupyx.scipy.spatial.distance.pdist(preds)
+    score2 = cupy.sum(score2) / (pred_size * (pred_size - 1))
+
+    return score1 - score2
+
+
+def score_es_original_raft(preds, obsrvs):
+    """Using RapidsAI's Raft library.
+    """
+    pred_size, pred_event = preds.shape
+    assert obsrvs.shape[1] == pred_event, "Observations and events have different sizes"
+
+    # pre-allocate memory
+    out1 = cupy.zeros((pred_size, obsrvs.shape[0]), dtype=preds.dtype)
+    out2 = cupy.zeros((pred_size, pred_size), dtype=preds.dtype)
+
+    # Calculate score1
+    pylibraft.distance.pairwise_distance(preds, obsrvs, out=out1)
+
+    # Calculate score2
+    pylibraft.distance.pairwise_distance(preds, preds, out=out2)
+
+    score1 = out1.mean()
+    score2 = out2.sum()
+    score2 /= (2 * pred_size * (pred_size - 1))
+
+    return score1 - score2
+
+
+def score_es_original_torch(preds, obsrvs):
+    """Using PyTorch.
+    """
+    pred_size, pred_event = preds.shape
+    assert obsrvs.shape[1] == pred_event, "Observations and events have different sizes"
+
+    # Calculate score1
+    score1 = torch.cdist(preds, obsrvs, p=2.0).mean()  # = euclidean
+
+    # Calculate score2
+    score2 = torch.nn.functional.pdist(preds, p=2.0).sum()  # = euclidean
+    score2 /= (pred_size * (pred_size - 1))
+
+    # TODO: synchronization?
+    return score1 - score2
+
+
+@torch.jit.script
+def score_es_original_torchscript(preds, obsrvs):
+    """Using PyTorch's TorchScript.
+    """
+    pred_size, pred_event = preds.shape
+    assert obsrvs.shape[1] == pred_event, "Observations and events have different sizes"
+
+    # Calculate score1
+    score1 = torch.cdist(preds, obsrvs, p=2.0).mean()  # = euclidean
+
+    # Calculate score2
+    score2 = torch.nn.functional.pdist(preds, p=2.0).sum()  # = euclidean
+    score2 /= (pred_size * (pred_size - 1))
+
+    return score1 - score2

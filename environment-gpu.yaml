@@ -1,12 +1,18 @@
-name: scoring-test-cpu
+name: scoring-test-gpu
 
 channels:
   - pytorch
+  - nvidia
   - conda-forge
+  - rapidsai
   - defaults
 
 dependencies:
-  - cpuonly  # for pytorch
+  - clang
+  - clangxx
+  - cupy
+  - cuda-version=11.8
+  - gxx
   - matplotlib==3.7.2
   - mpi=1.0=openmpi
   - mpi4py=3.1.4
@@ -14,7 +20,9 @@ dependencies:
   - numpy=1.24.4
   - openmpi=4.1.5
   - pandas=2.0.3
+  - pylibraft
   - python=3.10.12
   - pytorch
+  - pytorch-cuda=11.8
   - pyyaml=6.0.1
   - scipy=1.11.2

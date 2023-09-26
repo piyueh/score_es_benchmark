@@ -6,6 +6,10 @@
 from .original import score_es_original_numpy
 from .original import score_es_original_scipy
 from .original import score_es_original_numba
+from .original import score_es_original_cupy
+from .original import score_es_original_raft
+from .original import score_es_original_torch
+from .original import score_es_original_torchscript
 from .c_v1 import score_es_c_v1_numba
 from .c_v1 import score_es_c_v1_gcc
 from .c_v1 import score_es_c_v1_clang
@@ -23,6 +27,10 @@ options = {
     ("Original", "NumPy"): score_es_original_numpy,
     ("Original", "SciPy"): score_es_original_scipy,
     ("Original", "Numba"): score_es_original_numba,
+    ("Original", "CuPy"): score_es_original_cupy,
+    ("Original", "Raft"): score_es_original_raft,
+    ("Original", "Torch"): score_es_original_torch,
+    ("Original", "TorchScript"): score_es_original_torchscript,
     ("C v1", "Numba"): score_es_c_v1_numba,
     ("C v1", "GCC"): score_es_c_v1_gcc,
     ("C v1", "Clang"): score_es_c_v1_clang,
