@@ -143,10 +143,10 @@ def score_es_original_torch(preds, obsrvs):
     assert obsrvs.shape[1] == pred_event, "Observations and events have different sizes"
 
     # Calculate score1
-    score1 = torch.cdist(preds, obsrvs, p=2.0).mean()  # = euclidean
+    score1 = torch.cdist(preds, obsrvs).mean()  # = euclidean
 
     # Calculate score2
-    score2 = torch.nn.functional.pdist(preds, p=2.0).sum()  # = euclidean
+    score2 = torch.nn.functional.pdist(preds).sum()  # = euclidean
     score2 /= (pred_size * (pred_size - 1))
 
     # TODO: synchronization?
@@ -161,10 +161,10 @@ def score_es_original_torchscript(preds, obsrvs):
     assert obsrvs.shape[1] == pred_event, "Observations and events have different sizes"
 
     # Calculate score1
-    score1 = torch.cdist(preds, obsrvs, p=2.0).mean()  # = euclidean
+    score1 = torch.cdist(preds, obsrvs).mean()  # = euclidean
 
     # Calculate score2
-    score2 = torch.nn.functional.pdist(preds, p=2.0).sum()  # = euclidean
+    score2 = torch.nn.functional.pdist(preds).sum()  # = euclidean
     score2 /= (pred_size * (pred_size - 1))
 
     return score1 - score2
