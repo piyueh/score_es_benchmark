@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0", "setuptools-scm>=8.0", "pybind11~=2.11.1"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "quantom_prototype"
+description = "Prototype for QuantOm collaboration"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "No license"}
+maintainers = [{name = "Pi-Yueh Chuang", email = "pychuang@vt.edu"},]
+classifiers = ["Programming Language :: Python",]
+dynamic = ["dependencies", "version"]
+
+[project.urls]
+Public = "https://github.com/piyueh/quantom_prototype"
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools]
+packages = [
+    "quantom_prototype",
+    "quantom_prototype.envs",
+    "quantom_prototype.envs.loss",
+    "quantom_prototype.envs.loss.earth_mover_loss",
+    "quantom_prototype.envs.loss.earth_mover_loss.impls",
+]
+
+[tool.setuptools_scm]
+# leave empty here

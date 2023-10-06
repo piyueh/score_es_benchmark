@@ -1,3 +1,4 @@
+build
 results
 data
 *.so
@@ -5,3 +6,4 @@ data
 *.png
 *.pdf
 *.svg
+*.egg-info

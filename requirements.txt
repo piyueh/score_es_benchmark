@@ -1,0 +1,11 @@
+cuda-python == 11.8.2
+cupy == 12.2.0
+matplotlib == 3.7.2
+mpi4py == 3.1.4
+numba == 0.57.1
+numpy == 1.24.4
+pandas == 2.0.3
+pylibraft == 23.8.0
+PyYAML == 6.0.1
+scipy == 1.11.2
+torch == 2.0.1
